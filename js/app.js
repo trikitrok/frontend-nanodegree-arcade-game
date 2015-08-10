@@ -62,7 +62,6 @@ Player.prototype.handleInput = function(direction) {
 	if (direction) {
 		move.call(this, direction);
 		wrapPosition.call(this);
-		console.log(this.x + " - " + this.y);
 	}
 
 	function move(direction) {
@@ -108,10 +107,14 @@ function createEnemies(enemiesNumber) {
 	return enemies;
 }
 
-var allEnemies = createEnemies(5);
+function initializeCharacters() {
+	allEnemies = createEnemies(5);
+	player = new Player();
+}
 
-var player = new Player();
+var allEnemies, player;
 
+initializeCharacters();
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
