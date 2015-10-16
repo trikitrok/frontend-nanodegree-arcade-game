@@ -30,7 +30,7 @@ Enemy.prototype.moveToRoadStartWithRandomSpeed = function() {
 	}
 
 	function randomSpeed() {
-		return 50 * (1 + Math.floor(Math.random() * 3));
+		return 10; //50 * (1 + Math.floor(Math.random() * 3));
 	}
 
 	function randomX() {
@@ -38,35 +38,56 @@ Enemy.prototype.moveToRoadStartWithRandomSpeed = function() {
 	}
 };
 
-Enemy.prototype.collidesWith = function(player) {
-	return player.position.x <= (this.position.x + 50) &&
-		(player.position.x + 50) > this.position.x;
+Enemy.prototype.row = function() {
+	var rowsByY = {
+		60: 1,
+		140: 2,
+		220: 3
+	};
+	return rowsByY[this.position.y];
 };
+
+Enemy.prototype.collidesWith = function(player) {
+	console.log(this.position.y);
+
+	var sameColumn = this.row == player.row;
+
+	return sameColumn &&
+		(this.position.x + 80) > player.position.x &&
+		this.position.x < (player.position.x + 80);
+};
+
 
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function() {
+	this.yByRow = [-10, 72, 154, 236, 318, 420];
 	this.box = {
 		minX: 3,
 		maxX: 403,
-		minY: -10,
-		maxY: 415
+		minRow: 0,
+		maxRow: 5
 	};
 	this.sprite = 'images/char-boy.png';
 	this.position = {
 		x: this.box.minX,
-		y: this.box.maxY
+		row: this.box.maxRow
 	};
 };
 
 Player.prototype.update = function() {
 
+};
+
+Player.prototype.row = function() {
+	this.position.row;
 }
 
 Player.prototype.render = function() {
-	ctx.drawImage(Resources.get(this.sprite), this.position.x, this.position.y);
-}
+	var y = this.yByRow[this.position.row];
+	ctx.drawImage(Resources.get(this.sprite), this.position.x, y);
+};
 
 Player.prototype.handleInput = function(direction) {
 	if (direction) {
@@ -78,7 +99,7 @@ Player.prototype.handleInput = function(direction) {
 	function move(position, displacement) {
 		return {
 			x: position.x + displacement.x,
-			y: position.y + displacement.y
+			row: position.row + displacement.row
 		};
 	}
 
@@ -86,31 +107,31 @@ Player.prototype.handleInput = function(direction) {
 		var displacementByDirection = {
 			'left': {
 				x: -100,
-				y: 0
+				row: 0
 			},
 			'up': {
 				x: 0,
-				y: -85
+				row: -1
 			},
 			'right': {
 				x: 100,
-				y: 0
+				row: 0
 			},
 			'down': {
 				x: 0,
-				y: 85
+				row: 1
 			}
 		};
 		return displacementByDirection[direction];
 	}
 
 	function wrapPosition(position, box) {
-		if (position.y < box.minY) {
-			position.y = box.minY;
+		if (position.row < box.minRow) {
+			position.row = box.minRow;
 		}
 
-		if (position.y > box.maxY) {
-			position.y = box.maxY;
+		if (position.row > box.maxRow) {
+			position.row = box.maxRow;
 		}
 
 		if (position.x < box.minX) {
@@ -122,7 +143,7 @@ Player.prototype.handleInput = function(direction) {
 		}
 		return position;
 	}
-}
+};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
@@ -137,8 +158,20 @@ function createEnemies(enemiesNumber) {
 }
 
 function initializeCharacters() {
-	allEnemies = createEnemies(5);
+	allEnemies = createEnemies(1);
 	player = new Player();
+}
+
+function anyCollision() {
+	var i, enemy;
+	for (i = 0; i < allEnemies.length; i++) {
+		enemy = allEnemies[i];
+		if (enemy.collidesWith(player)) {
+			console.log("collision!")
+			return true;
+		}
+	}
+	return false;
 }
 
 var allEnemies, player;

@@ -80,18 +80,10 @@ var Engine = (function(global) {
 	 */
 	function update(dt) {
 		updateEntities(dt);
-		// if(anyCollision()) {
-		// 	reset();
-		// }
-	}
-
-	function anyCollision() {
-		allEnemies.forEach(function(enemy) {
-			if (enemy.collidesWith(player)) {
-				return true;
-			}
-			return false;
-		});
+		if(anyCollision()) {
+			console.log("reset!");
+			//reset();
+		}
 	}
 
 	/* This is called by the update function  and loops through all of the
