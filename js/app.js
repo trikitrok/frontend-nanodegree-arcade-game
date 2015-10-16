@@ -1,5 +1,6 @@
 // Enemies our player must avoid
 var Enemy = function() {
+	this.position = {};
 	this.sprite = 'images/enemy-bug.png';
 	this.moveToRoadStartWithRandomSpeed();
 };
@@ -7,20 +8,20 @@ var Enemy = function() {
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
-	this.x += this.speed * dt;
-	if (this.x > 500) {
+	this.position.x += this.speed * dt;
+	if (this.position.x > 500) {
 		this.moveToRoadStartWithRandomSpeed();
 	}
 };
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
-	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+	ctx.drawImage(Resources.get(this.sprite), this.position.x, this.position.y);
 };
 
 Enemy.prototype.moveToRoadStartWithRandomSpeed = function() {
-	this.x = randomX();
-	this.y = randomY();
+	this.position.x = randomX();
+	this.position.y = randomY();
 	this.speed = randomSpeed();
 
 	function randomY() {
@@ -37,61 +38,89 @@ Enemy.prototype.moveToRoadStartWithRandomSpeed = function() {
 	}
 };
 
+Enemy.prototype.collidesWith = function(player) {
+	return player.position.x <= (this.position.x + 50) &&
+		(player.position.x + 50) > this.position.x;
+};
+
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function() {
-	this.MINIMUM_X = 3;
-	this.MAXIMUM_X = 403;
-	this.MINIMUM_Y = -10;
-	this.MAXIMUM_Y = 415;
+	this.box = {
+		minX: 3,
+		maxX: 403,
+		minY: -10,
+		maxY: 415
+	};
 	this.sprite = 'images/char-boy.png';
-	this.x = this.MINIMUM_X;
-	this.y = this.MAXIMUM_Y;
+	this.position = {
+		x: this.box.minX,
+		y: this.box.maxY
+	};
 };
 
-Player.prototype.update = function(dt) {
+Player.prototype.update = function() {
 
 }
 
 Player.prototype.render = function() {
-	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+	ctx.drawImage(Resources.get(this.sprite), this.position.x, this.position.y);
 }
 
 Player.prototype.handleInput = function(direction) {
 	if (direction) {
-		move.call(this, direction);
-		wrapPosition.call(this);
+		var displacement = computeDisplacement(direction),
+			possiblePosition = move(this.position, displacement);
+		this.position = wrapPosition(possiblePosition, this.box);
 	}
 
-	function move(direction) {
-		if (direction === 'left') {
-			this.x -= 100;
-		} else if (direction === 'up') {
-			this.y -= 85;
-		} else if (direction === 'right') {
-			this.x += 100;
-		} else if (direction === 'down') {
-			this.y += 85;
-		}
+	function move(position, displacement) {
+		return {
+			x: position.x + displacement.x,
+			y: position.y + displacement.y
+		};
 	}
 
-	function wrapPosition() {
-		if (this.y < this.MINIMUM_Y) {
-			this.y = this.MINIMUM_Y;
+	function computeDisplacement(direction) {
+		var displacementByDirection = {
+			'left': {
+				x: -100,
+				y: 0
+			},
+			'up': {
+				x: 0,
+				y: -85
+			},
+			'right': {
+				x: 100,
+				y: 0
+			},
+			'down': {
+				x: 0,
+				y: 85
+			}
+		};
+		return displacementByDirection[direction];
+	}
+
+	function wrapPosition(position, box) {
+		if (position.y < box.minY) {
+			position.y = box.minY;
 		}
 
-		if (this.y > this.MAXIMUM_Y) {
-			this.y = this.MAXIMUM_Y;
+		if (position.y > box.maxY) {
+			position.y = box.maxY;
 		}
 
-		if (this.x < this.MINIMUM_X) {
-			this.x = this.MINIMUM_X;
+		if (position.x < box.minX) {
+			position.x = box.minX;
 		}
 
-		if (this.x > this.MAXIMUM_X) {
-			this.x = this.MAXIMUM_X;
+		if (position.x > box.maxX) {
+			position.x = box.maxX;
 		}
+		return position;
 	}
 }
 
@@ -125,7 +154,6 @@ document.addEventListener('keyup', function(e) {
 		39: 'right',
 		40: 'down'
 	};
-
 	player.handleInput(allowedKeys[e.keyCode]);
 });
 
