@@ -1,3 +1,5 @@
+"use strict";
+
 /* Engine.js
  * This file provides the game loop functionality (update entities and render),
  * draws the initial game board on the screen, and then calls the update and
@@ -13,7 +15,6 @@
  * the canvas' context (ctx) object globally available to make writing app.js
  * a little simpler to work with.
  */
-
 var Engine = (function(global) {
 	/* Predefine the variables we'll be using within this scope,
 	 * create the canvas element, grab the 2D context for that canvas
@@ -80,9 +81,19 @@ var Engine = (function(global) {
 	 */
 	function update(dt) {
 		updateEntities(dt);
-		if(anyCollision()) {
-			console.log("reset!");
-			//reset();
+		if (anyCollision()) {
+			reset();
+		}
+
+		function anyCollision() {
+			var i, enemy;
+			for (i = 0; i < allEnemies.length; i++) {
+				enemy = allEnemies[i];
+				if (enemy.collidesWith(player)) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
