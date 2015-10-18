@@ -54,7 +54,6 @@ Enemy.prototype.collidesWith = function(player) {
 		this.position.x < (player.position.x + 80);
 };
 
-
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
@@ -149,18 +148,18 @@ Player.prototype.handleInput = function(direction) {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
-function createEnemies(enemiesNumber) {
-	var i, enemies = [];
-	for (i = 0; i < enemiesNumber; i++) {
-		enemies.push(new Enemy());
-	}
-	return enemies;
-}
-
 function initializeCharacters() {
 	var enemiesNumber = 4;
 	allEnemies = createEnemies(enemiesNumber);
 	player = new Player();
+
+	function createEnemies(enemiesNumber) {
+		var i, enemies = [];
+		for (i = 0; i < enemiesNumber; i++) {
+			enemies.push(new Enemy());
+		}
+		return enemies;
+	}
 }
 
 var allEnemies, player;
